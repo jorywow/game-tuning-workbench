@@ -1,0 +1,9 @@
+node_modules/
+dist/
+examples/analysis-results/
+.game-tuning-workbench/
+.gtw-history/
+.novice/
+.env
+.env.*
+.DS_Store

@@ -1,0 +1,711 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.game-tuning-workbench.dev/schemas/game-tuning-model.schema.json",
+  "title": "GameTuningModel",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "modelId",
+    "generatedAt",
+    "project",
+    "evidence",
+    "worldview",
+    "coreGameplay",
+    "tuningParameters",
+    "assets",
+    "dependencies"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1.0"
+    },
+    "modelId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project": {
+      "$ref": "#/$defs/project"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "worldview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cards"],
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/worldviewCard"
+          }
+        }
+      }
+    },
+    "coreGameplay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "loopSteps", "rules"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "loopSteps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/loopStep"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gameplayRule"
+          }
+        }
+      }
+    },
+    "tuningParameters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/tuningParameter"
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assetSlot"
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency"
+      }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["confirmed", "inferred", "missing"]
+    },
+    "primitiveValue": {
+      "type": ["string", "number", "integer", "boolean", "null"]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "root",
+        "engine",
+        "detectedThreeVersion",
+        "entryPoints",
+        "runtimeRoots",
+        "coverage",
+        "limitations"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine": {
+          "const": "three"
+        },
+        "detectedThreeVersion": {
+          "type": ["string", "null"]
+        },
+        "entryPoints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "runtimeRoots": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "access"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jsonPointer": {
+          "type": "string"
+        },
+        "lineHint": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "access": {
+          "type": "string",
+          "enum": ["read-only", "editable"]
+        }
+      }
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "details", "confidence"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "source-code",
+            "configuration",
+            "asset",
+            "runtime-check",
+            "user-confirmation",
+            "inference"
+          ]
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        }
+      }
+    },
+    "worldviewCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "title",
+        "body",
+        "confidence",
+        "evidenceRefs",
+        "sourceBindings",
+        "editableFields",
+        "assetIds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "setting",
+            "player-identity",
+            "conflict",
+            "faction",
+            "character",
+            "location",
+            "tone",
+            "visual-language"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        },
+        "sourceBindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceBinding"
+          }
+        },
+        "editableFields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["title", "body", "assetIds"]
+          }
+        },
+        "assetIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        }
+      }
+    },
+    "loopStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "order",
+        "playerAction",
+        "gameResponse",
+        "reward",
+        "risk",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "playerAction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gameResponse": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reward": {
+          "type": "string"
+        },
+        "risk": {
+          "type": "string"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      }
+    },
+    "gameplayRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "ownerId",
+        "label",
+        "trigger",
+        "condition",
+        "result",
+        "playerFeedback",
+        "runtimeStatus",
+        "confidence",
+        "evidenceRefs",
+        "sourceBindings"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "ownerId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "condition": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "playerFeedback": {
+          "type": "string"
+        },
+        "runtimeStatus": {
+          "type": "string",
+          "enum": ["consumed", "declared-only", "unknown"]
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        },
+        "sourceBindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceBinding"
+          }
+        }
+      }
+    },
+    "effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direct", "indirect", "excluded"],
+      "properties": {
+        "direct": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "indirect": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "excluded": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "tuningParameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "ownerId",
+        "group",
+        "label",
+        "description",
+        "playerMeaning",
+        "valueType",
+        "unit",
+        "currentValue",
+        "defaultValue",
+        "control",
+        "sourceBinding",
+        "previewBinding",
+        "effects",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "ownerId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "group": {
+          "type": "string",
+          "enum": [
+            "controls",
+            "combat-pressure",
+            "pacing",
+            "rewards",
+            "forgiveness",
+            "visual-feedback"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "playerMeaning": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lower", "higher"],
+          "properties": {
+            "lower": {
+              "type": "string",
+              "minLength": 1
+            },
+            "higher": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "valueType": {
+          "type": "string",
+          "enum": ["number", "integer", "boolean", "enum"]
+        },
+        "unit": {
+          "type": ["string", "null"]
+        },
+        "currentValue": {
+          "$ref": "#/$defs/primitiveValue"
+        },
+        "defaultValue": {
+          "$ref": "#/$defs/primitiveValue"
+        },
+        "safeRange": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "step": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "control": {
+          "type": "string",
+          "enum": ["slider", "number", "toggle", "select"]
+        },
+        "sourceBinding": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "previewBinding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["consumer", "mode"],
+          "properties": {
+            "consumer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": ["live", "restart-scene", "restart-game"]
+            }
+          }
+        },
+        "effects": {
+          "$ref": "#/$defs/effects"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      }
+    },
+    "assetSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot",
+        "category",
+        "label",
+        "source",
+        "preview",
+        "usageSites",
+        "technicalContract",
+        "replacementPolicy",
+        "confidence",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "slot": {
+          "$ref": "#/$defs/stableId"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "player",
+            "enemy",
+            "environment",
+            "ui",
+            "effect",
+            "audio",
+            "model",
+            "animation"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "preview": {
+          "type": ["string", "null"]
+        },
+        "usageSites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceBinding"
+          }
+        },
+        "technicalContract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "acceptedMimeTypes"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["image", "model", "audio", "generated-runtime"]
+            },
+            "acceptedMimeTypes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "requiresTransparency": {
+              "type": "boolean"
+            },
+            "modelFormats": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["glb", "gltf"]
+              }
+            },
+            "requiresAnimations": {
+              "type": "boolean"
+            },
+            "maxPolygonCount": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "replacementPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["preserveGameplayBindings", "requiresValidation"],
+          "properties": {
+            "preserveGameplayBindings": {
+              "const": true
+            },
+            "requiresValidation": {
+              "type": "boolean"
+            }
+          }
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/evidenceRefs"
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "relation", "rationale"],
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/stableId"
+        },
+        "to": {
+          "$ref": "#/$defs/stableId"
+        },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "triggers",
+            "reads",
+            "writes",
+            "advances",
+            "presents",
+            "uses-asset",
+            "derives-from"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

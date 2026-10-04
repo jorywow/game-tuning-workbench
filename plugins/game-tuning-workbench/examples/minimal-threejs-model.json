@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "0.1.0",
+  "modelId": "demo.space-runner",
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "project": {
+    "name": "Space Runner",
+    "root": ".",
+    "engine": "three",
+    "detectedThreeVersion": "0.180.0",
+    "entryPoints": ["src/main.js"],
+    "runtimeRoots": ["src/game"],
+    "coverage": 0.72,
+    "limitations": ["Audio behavior has not been inspected yet."]
+  },
+  "evidence": [
+    {
+      "id": "evidence.three-import",
+      "kind": "source-code",
+      "file": "src/main.js",
+      "symbol": "THREE",
+      "details": "The game imports Three.js and creates a WebGLRenderer.",
+      "confidence": "confirmed"
+    },
+    {
+      "id": "evidence.enemy-config",
+      "kind": "configuration",
+      "file": "src/game/config.js",
+      "symbol": "enemySettings",
+      "details": "enemySettings exposes a spawn warning duration in seconds.",
+      "confidence": "confirmed"
+    },
+    {
+      "id": "evidence.enemy-consumer",
+      "kind": "source-code",
+      "file": "src/game/EnemyDirector.js",
+      "symbol": "showSpawnWarning",
+      "details": "EnemyDirector consumes spawnWarningSeconds before spawning an enemy.",
+      "confidence": "confirmed"
+    },
+    {
+      "id": "evidence.setting-inference",
+      "kind": "inference",
+      "file": "src/game/Scene.js",
+      "details": "Scene names and starfield visuals suggest a defensive space setting.",
+      "confidence": "inferred"
+    },
+    {
+      "id": "evidence.player-model",
+      "kind": "asset",
+      "file": "public/models/player.glb",
+      "details": "The main player loader resolves this GLB asset.",
+      "confidence": "confirmed"
+    }
+  ],
+  "worldview": {
+    "cards": [
+      {
+        "id": "world.setting",
+        "category": "setting",
+        "title": "星空防线",
+        "body": "玩家似乎正在星空航道中阻止不断逼近的敌人。",
+        "confidence": "inferred",
+        "evidenceRefs": ["evidence.setting-inference"],
+        "sourceBindings": [
+          {
+            "file": "src/game/Scene.js",
+            "symbol": "createStarfield",
+            "access": "read-only"
+          }
+        ],
+        "editableFields": ["title", "body", "assetIds"],
+        "assetIds": ["asset.player-main"]
+      }
+    ]
+  },
+  "coreGameplay": {
+    "summary": "观察警告、移动躲避敌人，并坚持更长时间。",
+    "loopSteps": [
+      {
+        "id": "loop.read-warning",
+        "order": 1,
+        "playerAction": "观察敌人出现前的警告",
+        "gameResponse": "游戏显示敌人即将出现的位置",
+        "reward": "获得调整位置的时间",
+        "risk": "反应过慢会被敌人逼近",
+        "confidence": "confirmed",
+        "evidenceRefs": ["evidence.enemy-consumer"]
+      },
+      {
+        "id": "loop.evade",
+        "order": 2,
+        "playerAction": "移动飞船避开敌人",
+        "gameResponse": "敌人从警告位置进入场景",
+        "reward": "继续生存并推进关卡",
+        "risk": "碰撞会损失生命",
+        "confidence": "inferred",
+        "evidenceRefs": ["evidence.setting-inference"]
+      }
+    ],
+    "rules": [
+      {
+        "id": "rule.enemy-spawn-warning",
+        "ownerId": "system.enemy-director",
+        "label": "敌人出现前先给出警告",
+        "trigger": "敌人即将生成",
+        "condition": "生成队列中存在待生成敌人",
+        "result": "等待设定时间后生成敌人",
+        "playerFeedback": "在生成位置显示警告",
+        "runtimeStatus": "consumed",
+        "confidence": "confirmed",
+        "evidenceRefs": [
+          "evidence.enemy-config",
+          "evidence.enemy-consumer"
+        ],
+        "sourceBindings": [
+          {
+            "file": "src/game/EnemyDirector.js",
+            "symbol": "showSpawnWarning",
+            "access": "read-only"
+          }
+        ]
+      }
+    ]
+  },
+  "tuningParameters": [
+    {
+      "id": "tuning.enemy-reaction-window",
+      "ownerId": "system.enemy-director",
+      "group": "combat-pressure",
+      "label": "敌人出现前的反应时间",
+      "description": "警告出现后，玩家有多久可以移动到安全位置。",
+      "playerMeaning": {
+        "lower": "敌人更突然，战斗压力更大",
+        "higher": "玩家有更多观察和躲避时间"
+      },
+      "valueType": "number",
+      "unit": "秒",
+      "currentValue": 1.2,
+      "defaultValue": 1.2,
+      "safeRange": {
+        "min": 0.4,
+        "max": 2.5,
+        "step": 0.1
+      },
+      "control": "slider",
+      "sourceBinding": {
+        "file": "src/game/config.js",
+        "symbol": "enemySettings.spawnWarningSeconds",
+        "access": "editable"
+      },
+      "previewBinding": {
+        "consumer": "EnemyDirector.showSpawnWarning",
+        "mode": "restart-scene"
+      },
+      "effects": {
+        "direct": ["改变敌人出现前的可反应时间"],
+        "indirect": ["可能改变玩家感受到的战斗压力"],
+        "excluded": ["不改变敌人移动速度", "不改变玩家武器伤害"]
+      },
+      "confidence": "confirmed",
+      "evidenceRefs": [
+        "evidence.enemy-config",
+        "evidence.enemy-consumer"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset.player-main",
+      "slot": "player.main-model",
+      "category": "model",
+      "label": "玩家主飞船",
+      "source": {
+        "file": "public/models/player.glb",
+        "access": "editable"
+      },
+      "preview": "public/models/player.glb",
+      "usageSites": [
+        {
+          "file": "src/game/Player.js",
+          "symbol": "loadPlayerModel",
+          "access": "read-only"
+        }
+      ],
+      "technicalContract": {
+        "kind": "model",
+        "acceptedMimeTypes": ["model/gltf-binary"],
+        "modelFormats": ["glb"],
+        "requiresAnimations": false,
+        "maxPolygonCount": 50000
+      },
+      "replacementPolicy": {
+        "preserveGameplayBindings": true,
+        "requiresValidation": true
+      },
+      "confidence": "confirmed",
+      "evidenceRefs": ["evidence.player-model"]
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "rule.enemy-spawn-warning",
+      "to": "tuning.enemy-reaction-window",
+      "relation": "reads",
+      "rationale": "The spawn-warning rule reads this duration before enemy creation."
+    },
+    {
+      "from": "world.setting",
+      "to": "asset.player-main",
+      "relation": "presents",
+      "rationale": "The player model is displayed alongside the inferred setting card."
+    }
+  ]
+}

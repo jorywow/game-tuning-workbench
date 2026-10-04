@@ -1,0 +1,15 @@
+{
+  "requestId": "request.player-ship-variant",
+  "providerId": "provider.pending",
+  "capability": "model.generate",
+  "assetSlotId": "asset.player-main",
+  "prompt": "轻盈、明亮、适合街机飞行游戏的低多边形主角飞船",
+  "negativePrompt": "不要武器挂载，不要复杂透明材质",
+  "referenceFiles": ["public/models/player.glb"],
+  "constraints": {
+    "acceptedMimeTypes": ["model/gltf-binary"],
+    "modelFormats": ["glb"],
+    "requiresAnimations": false,
+    "maxPolygonCount": 50000
+  }
+}

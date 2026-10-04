@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.game-tuning-workbench.dev/schemas/asset-generation-request.schema.json",
+  "title": "AssetGenerationRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "providerId",
+    "capability",
+    "assetSlotId",
+    "prompt",
+    "referenceFiles",
+    "constraints"
+  ],
+  "properties": {
+    "requestId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "providerId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "capability": {
+      "type": "string",
+      "enum": ["image.generate", "image.edit", "model.generate"]
+    },
+    "assetSlotId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "negativePrompt": {
+      "type": "string"
+    },
+    "referenceFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acceptedMimeTypes"],
+      "properties": {
+        "acceptedMimeTypes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "requiresRuntimeAdapter": {
+          "type": "boolean"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requiresTransparency": {
+          "type": "boolean"
+        },
+        "modelFormats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["glb", "gltf"]
+          }
+        },
+        "requiresAnimations": {
+          "type": "boolean"
+        },
+        "maxPolygonCount": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"
+    }
+  }
+}

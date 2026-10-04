@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.game-tuning-workbench.dev/schemas/change-set.schema.json",
+  "title": "GameTuningChangeSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "changeSetId",
+    "modelId",
+    "createdAt",
+    "state",
+    "summary",
+    "operations",
+    "impact",
+    "confirmation",
+    "verification",
+    "rollback"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.2.0"
+    },
+    "changeSetId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "modelId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["draft", "proposed", "applied", "verified", "failed", "reverted"]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expectedEffects",
+        "dependentTargetIds",
+        "excludedEffects",
+        "warnings"
+      ],
+      "properties": {
+        "expectedEffects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dependentTargetIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        },
+        "excludedEffects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "confirmedAt"],
+      "properties": {
+        "required": {
+          "const": true
+        },
+        "confirmedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "checks", "evidence"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["not-run", "passed", "failed"]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "strategy", "status"],
+      "properties": {
+        "available": {
+          "const": true
+        },
+        "strategy": {
+          "const": "restore-recorded-before-values"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["not-run", "passed", "failed"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"
+    },
+    "jsonValue": {
+      "type": ["object", "array", "string", "number", "integer", "boolean", "null"]
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "access"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jsonPointer": {
+          "type": "string"
+        },
+        "lineHint": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "access": {
+          "type": "string",
+          "enum": ["editable", "read-only"]
+        }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operationId",
+        "type",
+        "targetId",
+        "application",
+        "sourceBinding",
+        "before",
+        "after",
+        "reason"
+      ],
+      "properties": {
+        "operationId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "set-parameter",
+            "edit-worldview",
+            "edit-gameplay",
+            "replace-asset"
+          ]
+        },
+        "targetId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "application": {
+          "$ref": "#/$defs/application"
+        },
+        "sourceBinding": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "before": {
+          "$ref": "#/$defs/jsonValue"
+        },
+        "after": {
+          "$ref": "#/$defs/jsonValue"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "executor", "reason"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["automatic", "codex-assisted"]
+        },
+        "executor": {
+          "type": "string",
+          "enum": ["local-apply-engine", "codex"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "description", "status"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["build", "browser", "assertion", "asset-contract"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["not-run", "passed", "failed"]
+        }
+      }
+    }
+  }
+}

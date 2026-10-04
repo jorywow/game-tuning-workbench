@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="Three.js 游戏调优工作台">
+    <title>游戏调优工作台</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div id="app" class="boot-screen" aria-live="polite">
+      <div class="boot-mark" aria-hidden="true">GTW</div>
+      <p>正在读取游戏调优模型…</p>
+    </div>
+
+    <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title">
+      <div class="detail-dialog__header">
+        <div>
+          <small data-dialog-kicker>SOURCE-BACKED DETAIL</small>
+          <h2 id="detail-title">详情</h2>
+        </div>
+        <button type="button" class="icon-button" data-dialog-close aria-label="关闭详情">×</button>
+      </div>
+      <div id="detail-content" class="detail-dialog__content"></div>
+    </dialog>
+
+    <script type="module">
+      const response = await fetch('./api/flow/status').catch(() => null);
+      if (response?.ok) {
+        const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = './novice.css'; document.head.append(css);
+        await import('./novice.js');
+      } else await import('./app.js');
+    </script>
+  </body>
+</html>

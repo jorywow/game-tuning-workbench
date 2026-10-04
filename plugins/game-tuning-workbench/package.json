@@ -1,0 +1,14 @@
+{
+  "name": "game-tuning-workbench",
+  "version": "0.4.1-beta.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:integration": "node tests/apply-server.integration.mjs && node tests/runtime-preview.integration.mjs && node tests/novice-server.integration.mjs && node tests/novice-preview.integration.mjs && node tests/novice-permission.browser.mjs",
+    "check": "node scripts/validate-contracts.mjs",
+    "release": "node scripts/package-release.mjs",
+    "setup:browser": "playwright install chromium"
+  },
+  "optionalDependencies": { "playwright": "^1.55.0" }
+}

@@ -1,0 +1,8 @@
+interface:
+  display_name: "游戏调优工作台"
+  short_description: "一句话打开 Three.js 游戏工作台，先试玩修改，再确认保存或恢复"
+  brand_color: "#C5ED89"
+  default_prompt: "使用 $game-tuning-workbench 打开这个游戏的调优工作台。"
+
+policy:
+  allow_implicit_invocation: true

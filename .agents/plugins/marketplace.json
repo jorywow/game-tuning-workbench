@@ -1,0 +1,20 @@
+{
+  "name": "game-tuning-workbench-release",
+  "interface": {
+    "displayName": "Game Tuning Workbench Releases"
+  },
+  "plugins": [
+    {
+      "name": "game-tuning-workbench",
+      "source": {
+        "source": "local",
+        "path": "./plugins/game-tuning-workbench"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

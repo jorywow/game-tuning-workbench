@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "0.2.0",
+  "changeSetId": "change.enemy-warning-longer",
+  "modelId": "demo.space-runner",
+  "createdAt": "2026-08-31T00:05:00.000Z",
+  "state": "draft",
+  "summary": "给玩家更多时间判断敌人的出现位置",
+  "operations": [
+    {
+      "operationId": "operation.enemy-warning",
+      "type": "set-parameter",
+      "targetId": "tuning.enemy-reaction-window",
+      "application": {
+        "strategy": "automatic",
+        "executor": "local-apply-engine",
+        "reason": "存在经过确认的精确可写源码绑定"
+      },
+      "sourceBinding": {
+        "file": "src/game/config.js",
+        "symbol": "enemySettings.spawnWarningSeconds",
+        "access": "editable"
+      },
+      "before": 1.2,
+      "after": 1.6,
+      "reason": "降低第一次遇敌时的突然感"
+    }
+  ],
+  "impact": {
+    "expectedEffects": ["敌人出现前的警告延长 0.4 秒"],
+    "dependentTargetIds": ["rule.enemy-spawn-warning"],
+    "excludedEffects": ["敌人移动速度保持不变", "玩家武器伤害保持不变"],
+    "warnings": []
+  },
+  "confirmation": {
+    "required": true,
+    "confirmedAt": null
+  },
+  "verification": {
+    "status": "not-run",
+    "checks": [
+      {
+        "type": "build",
+        "description": "运行项目现有构建命令",
+        "command": "npm run build",
+        "status": "not-run"
+      },
+      {
+        "type": "browser",
+        "description": "在浏览器中观察警告到敌人出现的时间，并确认移动与伤害不变",
+        "status": "not-run"
+      }
+    ],
+    "evidence": []
+  },
+  "rollback": {
+    "available": true,
+    "strategy": "restore-recorded-before-values",
+    "status": "not-run"
+  }
+}
